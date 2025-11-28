@@ -415,10 +415,45 @@ async function startServer() {
 
   await server.start();
 
+  // Root route handler
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Employee Management System API',
+      graphqlEndpoint: '/graphql',
+      status: 'running'
+    });
+  });
+
+  // CORS configuration - support both development and production
+  const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
   app.use(
     '/graphql',
     cors({
-      origin: ['http://localhost:5173', 'http://localhost:3000'],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // In development, allow all origins
+        if (process.env.NODE_ENV !== 'production') {
+          return callback(null, true);
+        }
+
+        // In production, check allowed origins
+        // If CORS_ORIGIN is set to '*' or not set, allow all (for initial deployment)
+        if (process.env.CORS_ORIGIN === '*' || !process.env.CORS_ORIGIN) {
+          return callback(null, true);
+        }
+
+        // Check if origin is in allowed list
+        if (allowedOrigins.some(allowed => origin.includes(allowed) || allowed.includes(origin))) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true
     }),
     express.json(),
@@ -430,10 +465,16 @@ async function startServer() {
     })
   );
 
-  app.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
-    console.log(`📊 GraphQL Playground available at http://localhost:${PORT}/graphql`);
-  });
+  // For Vercel deployment
+  if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+      console.log(`📊 GraphQL Playground available at http://localhost:${PORT}/graphql`);
+    });
+  }
+
+  // Export for Vercel
+  module.exports = app;
 }
 
 startServer().catch((error) => {
