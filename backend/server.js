@@ -146,6 +146,7 @@ const typeDefs = `
     department: String!
     salary: Float!
     joinDate: String!
+    password: String!
   }
 
   input EmployeeUpdateInput {
@@ -223,6 +224,11 @@ const resolvers = {
       requireAuth(user);
 
       let filteredEmployees = [...employees];
+
+      // Restrict non-admin users to only their own record
+      if (user.role !== 'admin') {
+        filteredEmployees = filteredEmployees.filter(emp => emp.email === user.email);
+      }
 
       // Apply filters
       if (filter) {
@@ -337,14 +343,28 @@ const resolvers = {
 
     addEmployee: async (_, { input }, { user }) => {
       requireAdmin(user);
+      
+      // Separate password from employee profile fields
+      const { password, ...employeeData } = input;
 
       const newEmployee = {
         id: (employees.length + 1).toString(),
-        ...input,
+        ...employeeData,
         role: 'employee'
       };
 
       employees.push(newEmployee);
+
+      // Create a login user record so the employee can sign in
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = {
+        id: (users.length + 1).toString(),
+        email: newEmployee.email,
+        password: hashedPassword,
+        role: 'employee'
+      };
+      users.push(newUser);
+
       return newEmployee;
     },
 

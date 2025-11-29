@@ -52,7 +52,19 @@ const EmployeeApp = () => {
     },
     skip: !user,
     errorPolicy: "all",
+    fetchPolicy: "network-only",
   });
+
+  // When the logged-in user changes (e.g., switch between employee and admin),
+  // force a fresh fetch from the server so data matches the new role.
+  useEffect(() => {
+    if (user) {
+      refetch({
+        first: 50,
+        sort: { field: "name", order: "ASC" },
+      }).catch(() => {});
+    }
+  }, [user, refetch]);
 
   const [deleteEmployee, { loading: deleteLoading }] = useMutation(DELETE_EMPLOYEE, {
     refetchQueries: [{ query: GET_EMPLOYEES, variables: { first: 50, sort: { field: "name", order: "ASC" } } }],
@@ -68,6 +80,8 @@ const EmployeeApp = () => {
 
   const handleLogin = (userData) => {
     setUser(userData);
+    // Ensure Apollo cache and queries are refreshed when switching users
+    client.resetStore().catch(() => {});
   };
 
   const handleLogout = () => {
@@ -76,6 +90,8 @@ const EmployeeApp = () => {
     setUser(null);
     setSelectedEmployee(null);
     setView("grid");
+    // Clear Apollo cache on logout so next login starts clean
+    client.clearStore().catch(() => {});
   };
 
   const handleEmployeeClick = (employee) => {
@@ -195,15 +211,33 @@ const EmployeeApp = () => {
       default:
         return view === "grid" ? (
           <div>
+            {/* Header section differs for admin vs employee to give a more personal, modern feel */}
             <div className="mb-8 flex justify-between items-start">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Employee Management
-                </h1>
-                <p className="text-gray-600">
-                  Manage your team with our comprehensive employee dashboard
-                </p>
+                {user?.role === "admin" ? (
+                  <>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                      Employee Management
+                    </h1>
+                    <p className="text-gray-600">
+                      Manage your team with our comprehensive employee dashboard
+                    </p>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      Employee Workspace
+                    </span>
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                      My Profile & Performance
+                    </h1>
+                    <p className="text-gray-600">
+                      View and manage your personal information, skills and performance in a focused view just for you.
+                    </p>
+                  </div>
+                )}
               </div>
+
               {user?.role === "admin" && (
                 <button
                   onClick={handleAddEmployee}
@@ -215,12 +249,15 @@ const EmployeeApp = () => {
               )}
             </div>
 
-            <EmployeeGrid
-              employees={employees}
-              onEmployeeClick={handleEmployeeClick}
-              onEmployeeAction={handleEmployeeAction}
-              loading={loading}
-            />
+            <div className={user?.role === "admin" ? "" : "max-w-3xl mx-auto"}>
+              <EmployeeGrid
+                employees={employees}
+                onEmployeeClick={handleEmployeeClick}
+                onEmployeeAction={handleEmployeeAction}
+                loading={loading}
+                isEmployeeView={user?.role !== "admin"}
+              />
+            </div>
 
             {error && (
               <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">

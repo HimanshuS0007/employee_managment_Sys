@@ -19,6 +19,7 @@ const EmployeeGrid = ({
   onEmployeeClick,
   onEmployeeAction,
   loading,
+  isEmployeeView = false,
 }) => {
   const [viewMode, setViewMode] = useState("tile"); // 'grid' or 'tile'
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,6 +29,9 @@ const EmployeeGrid = ({
   const departments = [...new Set(employees.map((emp) => emp.department))];
 
   const filteredEmployees = employees.filter((employee) => {
+    // In the employee's personal view we don't apply search or department filters
+    if (isEmployeeView) return true;
+
     const matchesSearch =
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,6 +113,152 @@ const EmployeeGrid = ({
     );
   }
 
+  // Dedicated modern glassy card for employee self view (single record)
+  if (isEmployeeView && filteredEmployees.length === 1) {
+    const employee = filteredEmployees[0];
+
+    return (
+      <div className="flex justify-center">
+        <div className="relative w-full max-w-4xl">
+          {/* Soft glow behind the glass card */}
+          <div className="absolute -inset-6 bg-gradient-to-br from-indigo-500/20 via-purple-500/16 to-pink-500/14 rounded-[2.4rem] blur-2xl pointer-events-none" />
+
+          <div className="relative bg-white/85 backdrop-blur-2xl border border-white/60 rounded-[2.25rem] shadow-[0_24px_60px_rgba(15,23,42,0.35)] overflow-hidden">
+            {/* Gradient strip */}
+            <div className="h-32 bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500" />
+
+            {/* Avatar & basic info */}
+            <div className="px-10 -mt-16 flex items-center gap-7">
+              <div className="w-24 h-24 rounded-2xl bg-white shadow-xl flex items-center justify-center border-4 border-white/80">
+                <span className="text-3xl font-bold text-slate-800">
+                  {employee.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()}
+                </span>
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-4 justify-between">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
+                      {employee.name}
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-3">
+                      {employee.class}
+                    </p>
+                  </div>
+                  <span className="inline-flex px-4 py-1.5 rounded-full text-xs font-semibold bg-white/85 text-slate-800 border border-white/80 shadow-sm">
+                    {employee.department}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main content */}
+            <div className="px-10 pb-10 pt-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Left: stats */}
+              <div className="space-y-4">
+                <div className="bg-white/70 rounded-2xl p-5 shadow-sm border border-white/80">
+                  <p className="text-xs font-medium text-slate-500 mb-1">Age</p>
+                  <p className="text-2xl font-semibold text-slate-900">
+                    {employee.age}
+                  </p>
+                </div>
+                <div className="bg-white/70 rounded-2xl p-5 shadow-sm border border-white/80">
+                  <p className="text-xs font-medium text-slate-500 mb-1">
+                    Skills
+                  </p>
+                  <p className="text-2xl font-semibold text-slate-900">
+                    {employee.subjects.length}
+                  </p>
+                </div>
+                <div className="bg-white/70 rounded-2xl p-5 shadow-sm border border-white/80">
+                  <p className="text-xs font-medium text-slate-500 mb-1">
+                    Salary
+                  </p>
+                  <p className="text-lg font-semibold text-slate-900">
+                    ${employee.salary.toLocaleString()}/year
+                  </p>
+                </div>
+              </div>
+
+              {/* Middle: attendance & meta */}
+              <div className="space-y-4">
+                <div className="bg-white/75 rounded-2xl p-5 shadow-sm border border-white/80">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-xs font-medium text-slate-500">
+                      Attendance
+                    </p>
+                    <p
+                      className={`text-xs font-bold ${
+                        employee.attendance >= 95
+                          ? "text-emerald-600"
+                          : employee.attendance >= 85
+                          ? "text-amber-600"
+                          : "text-rose-600"
+                      }`}
+                    >
+                      {employee.attendance}%
+                    </p>
+                  </div>
+                  <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        employee.attendance >= 95
+                          ? "bg-gradient-to-r from-emerald-400 to-emerald-600"
+                          : employee.attendance >= 85
+                          ? "bg-gradient-to-r from-amber-400 to-amber-600"
+                          : "bg-gradient-to-r from-rose-400 to-rose-600"
+                      }`}
+                      style={{ width: `${employee.attendance}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-white/75 rounded-2xl p-5 shadow-sm border border-white/80 text-sm text-slate-600 space-y-1">
+                  <p className="truncate">{employee.email}</p>
+                  <p className="text-xs text-slate-400">
+                    Joined {new Date(employee.joinDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right: skills */}
+              <div className="bg-white/75 rounded-2xl p-5 shadow-sm border border-white/80 flex flex-col justify-between min-h-[180px]">
+                <div>
+                  <p className="text-xs font-medium text-slate-500 mb-2">
+                    Key skills
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {employee.subjects.map((subject, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-slate-900/5 text-slate-800 border border-slate-200/80 backdrop-blur-sm"
+                      >
+                        {subject}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => onEmployeeClick(employee)}
+                    className="px-5 py-2.5 rounded-xl text-sm font-medium bg-slate-900 text-white shadow-md hover:shadow-lg hover:bg-slate-800 transition-all duration-200"
+                  >
+                    View full profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Modern Controls */}
@@ -149,7 +299,8 @@ const EmployeeGrid = ({
             </div>
 
             <div className="text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-              {filteredEmployees.length} employee{filteredEmployees.length !== 1 ? 's' : ''}
+              {filteredEmployees.length} employee
+              {filteredEmployees.length !== 1 ? "s" : ""}
             </div>
           </div>
 
@@ -164,7 +315,9 @@ const EmployeeGrid = ({
               )}
             >
               <Grid size={18} />
-              <span className="text-sm font-medium hidden sm:inline">Cards</span>
+              <span className="text-sm font-medium hidden sm:inline">
+                Cards
+              </span>
             </button>
             <button
               onClick={() => setViewMode("grid")}
@@ -176,7 +329,9 @@ const EmployeeGrid = ({
               )}
             >
               <List size={18} />
-              <span className="text-sm font-medium hidden sm:inline">Table</span>
+              <span className="text-sm font-medium hidden sm:inline">
+                Table
+              </span>
             </button>
           </div>
         </div>
@@ -322,7 +477,11 @@ const EmployeeGrid = ({
               <div className="relative -mt-8 flex justify-center">
                 <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-white">
                   <span className="text-xl font-bold text-gray-700">
-                    {employee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {employee.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
                   </span>
                 </div>
               </div>
@@ -333,17 +492,21 @@ const EmployeeGrid = ({
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
                     {employee.name}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {employee.class}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-2">{employee.class}</p>
                   <div className="flex justify-center">
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      employee.department === 'Engineering' ? 'bg-blue-100 text-blue-800' :
-                      employee.department === 'Product' ? 'bg-purple-100 text-purple-800' :
-                      employee.department === 'Design' ? 'bg-pink-100 text-pink-800' :
-                      employee.department === 'Marketing' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        employee.department === "Engineering"
+                          ? "bg-blue-100 text-blue-800"
+                          : employee.department === "Product"
+                          ? "bg-purple-100 text-purple-800"
+                          : employee.department === "Design"
+                          ? "bg-pink-100 text-pink-800"
+                          : employee.department === "Marketing"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
                       {employee.department}
                     </span>
                   </div>
@@ -352,11 +515,15 @@ const EmployeeGrid = ({
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-gray-900">{employee.age}</div>
+                    <div className="text-lg font-bold text-gray-900">
+                      {employee.age}
+                    </div>
                     <div className="text-xs text-gray-600">Age</div>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-3 text-center">
-                    <div className="text-lg font-bold text-gray-900">{employee.subjects.length}</div>
+                    <div className="text-lg font-bold text-gray-900">
+                      {employee.subjects.length}
+                    </div>
                     <div className="text-xs text-gray-600">Skills</div>
                   </div>
                 </div>
@@ -383,20 +550,29 @@ const EmployeeGrid = ({
                 {/* Attendance Progress */}
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-medium text-gray-700">Attendance</span>
-                    <span className={`text-xs font-bold ${
-                      employee.attendance >= 95 ? 'text-green-600' :
-                      employee.attendance >= 85 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
+                    <span className="text-xs font-medium text-gray-700">
+                      Attendance
+                    </span>
+                    <span
+                      className={`text-xs font-bold ${
+                        employee.attendance >= 95
+                          ? "text-green-600"
+                          : employee.attendance >= 85
+                          ? "text-yellow-600"
+                          : "text-red-600"
+                      }`}
+                    >
                       {employee.attendance}%
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all duration-500 ${
-                        employee.attendance >= 95 ? 'bg-gradient-to-r from-green-400 to-green-600' :
-                        employee.attendance >= 85 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                        'bg-gradient-to-r from-red-400 to-red-600'
+                        employee.attendance >= 95
+                          ? "bg-gradient-to-r from-green-400 to-green-600"
+                          : employee.attendance >= 85
+                          ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                          : "bg-gradient-to-r from-red-400 to-red-600"
                       }`}
                       style={{ width: `${employee.attendance}%` }}
                     ></div>
@@ -405,7 +581,9 @@ const EmployeeGrid = ({
 
                 {/* Contact Info */}
                 <div className="text-center">
-                  <p className="text-xs text-gray-500 truncate">{employee.email}</p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {employee.email}
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">
                     ${employee.salary.toLocaleString()}/year
                   </p>
@@ -429,12 +607,11 @@ const EmployeeGrid = ({
               No employees found
             </h3>
             <p className="text-gray-500 mb-6">
-              {searchTerm || filterDepartment 
+              {searchTerm || filterDepartment
                 ? "Try adjusting your search criteria or filters to find employees."
-                : "No employees have been added to the system yet."
-              }
+                : "No employees have been added to the system yet."}
             </p>
-            {(!searchTerm && !filterDepartment) && (
+            {!searchTerm && !filterDepartment && (
               <button
                 onClick={() => {
                   setSearchTerm("");

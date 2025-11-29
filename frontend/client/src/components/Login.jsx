@@ -52,13 +52,13 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-600 via-purple-600 to-blue-800 flex items-center justify-center px-4">
       <div className="max-w-6xl w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Left Side - Login Form */}
           <div className="bg-white rounded-2xl shadow-2xl p-8">
             <div className="text-center mb-8">
-              <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
+              <div className="mx-auto h-16 w-16 bg-linear-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
                 <Lock className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
@@ -128,7 +128,7 @@ const Login = ({ onLogin }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="w-full bg-linear-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -166,12 +166,17 @@ const Login = ({ onLogin }) => {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <span className="text-white font-mono text-sm">admin@company.com</span>
+                    <span className="text-white font-mono text-sm">
+                      admin@company.com
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('admin@company.com');
-                        setFormData({...formData, email: 'admin@company.com'});
+                        navigator.clipboard.writeText("admin@company.com");
+                        setFormData({
+                          ...formData,
+                          email: "admin@company.com",
+                        });
                       }}
                       className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-colors"
                     >
@@ -179,12 +184,14 @@ const Login = ({ onLogin }) => {
                     </button>
                   </div>
                   <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <span className="text-white font-mono text-sm">password</span>
+                    <span className="text-white font-mono text-sm">
+                      password
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('password');
-                        setFormData({...formData, password: 'password'});
+                        navigator.clipboard.writeText("password");
+                        setFormData({ ...formData, password: "password" });
                       }}
                       className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-colors"
                     >
@@ -195,9 +202,12 @@ const Login = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={() => {
-                    setFormData({email: 'admin@company.com', password: 'password'});
+                    setFormData({
+                      email: "admin@company.com",
+                      password: "password",
+                    });
                   }}
-                  className="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                  className="w-full mt-4 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-105"
                 >
                   🔥 Use Admin Login
                 </button>
@@ -215,12 +225,14 @@ const Login = ({ onLogin }) => {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <span className="text-white font-mono text-sm">john@company.com</span>
+                    <span className="text-white font-mono text-sm">
+                      john@company.com
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('john@company.com');
-                        setFormData({...formData, email: 'john@company.com'});
+                        navigator.clipboard.writeText("john@company.com");
+                        setFormData({ ...formData, email: "john@company.com" });
                       }}
                       className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors"
                     >
@@ -228,12 +240,14 @@ const Login = ({ onLogin }) => {
                     </button>
                   </div>
                   <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <span className="text-white font-mono text-sm">password</span>
+                    <span className="text-white font-mono text-sm">
+                      password
+                    </span>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText('password');
-                        setFormData({...formData, password: 'password'});
+                        navigator.clipboard.writeText("password");
+                        setFormData({ ...formData, password: "password" });
                       }}
                       className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors"
                     >
@@ -244,9 +258,12 @@ const Login = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={() => {
-                    setFormData({email: 'john@company.com', password: 'password'});
+                    setFormData({
+                      email: "john@company.com",
+                      password: "password",
+                    });
                   }}
-                  className="w-full mt-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-105"
+                  className="w-full mt-4 bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:scale-105"
                 >
                   ✨ Use Employee Login
                 </button>
@@ -255,7 +272,8 @@ const Login = ({ onLogin }) => {
               {/* Info Tip */}
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
                 <p className="text-white/90 text-sm text-center">
-                  💡 <strong>Tip:</strong> Admin can manage all employees, Employee can only view their own data
+                  💡 <strong>Tip:</strong> Admin can manage all employees,
+                  Employee can only view their own data
                 </p>
               </div>
             </div>

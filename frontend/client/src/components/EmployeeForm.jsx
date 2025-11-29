@@ -14,6 +14,7 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
     department: "",
     salary: "",
     joinDate: "",
+    password: "",
   });
   const [subjectInput, setSubjectInput] = useState("");
   const [errors, setErrors] = useState({});
@@ -53,6 +54,7 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
         department: employee.department || "",
         salary: employee.salary?.toString() || "",
         joinDate: employee.joinDate || "",
+        password: "", // we never show or edit existing passwords
       });
     } else {
       resetForm();
@@ -70,6 +72,7 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
       department: "",
       salary: "",
       joinDate: "",
+      password: "",
     });
     setSubjectInput("");
     setErrors({});
@@ -88,6 +91,7 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
     if (!formData.department.trim()) newErrors.department = "Department is required";
     if (!formData.salary || formData.salary < 0) newErrors.salary = "Valid salary is required";
     if (!formData.joinDate) newErrors.joinDate = "Join date is required";
+    if (mode === "add" && !formData.password.trim()) newErrors.password = "Temporary password is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -98,7 +102,7 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
     
     if (!validateForm()) return;
 
-    const submitData = {
+    const submitDataBase = {
       ...formData,
       age: parseInt(formData.age),
       attendance: parseFloat(formData.attendance),
@@ -107,13 +111,15 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
 
     try {
       if (mode === "edit") {
+        const { password, ...updateInput } = submitDataBase;
         await updateEmployee({
           variables: {
             id: employee.id,
-            input: submitData,
+            input: updateInput,
           },
         });
       } else {
+        const submitData = submitDataBase;
         await addEmployee({
           variables: {
             input: submitData,
@@ -352,6 +358,27 @@ const EmployeeForm = ({ employee, isOpen, onClose, onSuccess, mode = "add" }) =>
               />
               {errors.joinDate && <p className="text-red-500 text-xs mt-1">{errors.joinDate}</p>}
             </div>
+
+            {/* Temporary Password (add only) */}
+            {mode === "add" && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Temporary Password *{" "}
+                  <span className="text-xs text-gray-400">(used by employee to log in)</span>
+                </label>
+                <input
+                  type="text"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.password ? "border-red-300" : "border-gray-300"
+                  }`}
+                  placeholder="Enter a temporary password to share with the employee"
+                />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              </div>
+            )}
           </div>
 
           {/* Subjects/Skills */}
